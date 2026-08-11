@@ -1,0 +1,6 @@
+{
+  "name": "موقع التوبة - القرآن الكريم",
+  "description": "موقع التوبة الشامل لقراءة واستماع وتفسير القرآن الكريم بالتلاوات العذبة لمشاهير القراء مع خيار متابعة الآيات.",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
