@@ -111,6 +111,10 @@ export interface PrayerTimes {
 
 export type ViewMode = 'surahs' | 'reader' | 'mushaf_page' | 'khatma' | 'bookmarks' | 'search' | 'athkar' | 'prayers' | 'ai_assistant';
 
+export type NavDisplayMode = 'expanded' | 'floating' | 'hidden';
+
 export type FontStyle = 'Amiri Quran' | 'Scheherazade New' | 'Amiri' | 'Cairo';
 
-export type PaperTheme = 'light' | 'sepia' | 'dark' | 'emerald';
+export type PaperTheme = 'dark' | 'light' | 'sepia' | 'emerald' | 'navy' | 'sand';
+
+export type TrackingHighlightColor = 'amber' | 'green' | 'red' | 'blue' | 'purple' | 'teal' | 'orange';

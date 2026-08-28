@@ -164,16 +164,23 @@ export const getAyahAudioCandidateUrls = (reciterId: string, surahNum: number, a
   if (reciterId.includes('Refaat')) {
     candidates.push(`https://everyayah.com/data/Muhammad_Refaat_64kbps/${filename}`);
     candidates.push(`https://mirrors.quranicaudio.com/everyayah/Muhammad_Refaat_64kbps/${filename}`);
+    candidates.push(`https://media.everyayah.com/data/Muhammad_Refaat_64kbps/${filename}`);
     candidates.push(`https://archive.org/download/Muhammad_Refaat_EveryAyah/${filename}`);
   } else if (reciterId.includes('Metwally')) {
     candidates.push(`https://everyayah.com/data/Sayeed_al_Metwally_128kbps/${filename}`);
     candidates.push(`https://mirrors.quranicaudio.com/everyayah/Sayeed_al_Metwally_128kbps/${filename}`);
+    candidates.push(`https://media.everyayah.com/data/Sayeed_al_Metwally_128kbps/${filename}`);
     candidates.push(`https://archive.org/download/Elsayed-Metwally-Abdel-Aal/${filename}`);
   } else {
     // Standard reciters on EveryAyah & Mirrors
     candidates.push(`https://everyayah.com/data/${reciterId}/${filename}`);
     candidates.push(`https://mirrors.quranicaudio.com/everyayah/${reciterId}/${filename}`);
+    candidates.push(`https://media.everyayah.com/data/${reciterId}/${filename}`);
   }
+
+  // Universal high-reliability fallback CDN if a custom reciter server is unreachable
+  candidates.push(`https://everyayah.com/data/Alafasy_128kbps/${filename}`);
+  candidates.push(`https://mirrors.quranicaudio.com/everyayah/Alafasy_128kbps/${filename}`);
 
   return Array.from(new Set(candidates));
 };

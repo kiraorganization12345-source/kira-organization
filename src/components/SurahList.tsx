@@ -6,7 +6,7 @@ import { toArabicNumeral, removeTashkeel } from '../services/quranApi';
 import heroBgImage from '../assets/images/quran_hero_bg_1786468421170.jpg';
 
 interface SurahListProps {
-  onSelectSurah: (surahId: number) => void;
+  onSelectSurah: (surahId: number, autoPlay?: boolean) => void;
   onSelectJuz?: (juzNumber: number) => void;
   onPlaySurah?: (surahId: number) => void;
   favorites: number[];
@@ -244,21 +244,30 @@ export const SurahList: React.FC<SurahListProps> = ({
                   </div>
                 </div>
 
-                {/* Favorite Star Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite(surah.id);
-                  }}
-                  className={`p-2 rounded-lg transition-colors ${
-                    isFav
-                      ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40'
-                      : 'text-stone-300 dark:text-stone-700 hover:text-amber-400'
-                  }`}
-                  title={isFav ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
-                >
-                  <Star className={`w-5 h-5 ${isFav ? 'fill-amber-500' : ''}`} />
-                </button>
+                {/* Actions: Play button and Favorite Star */}
+                <div className="flex items-center gap-1">
+                  <div 
+                    className="p-2 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-stone-950 transition-all shadow-sm"
+                    title="تشغيل التلاوة الصوتية مباشرة"
+                  >
+                    <PlayCircle className="w-5 h-5 fill-current" />
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite(surah.id);
+                    }}
+                    className={`p-2 rounded-lg transition-colors ${
+                      isFav
+                        ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/40'
+                        : 'text-stone-300 dark:text-stone-700 hover:text-amber-400'
+                    }`}
+                    title={isFav ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
+                  >
+                    <Star className={`w-5 h-5 ${isFav ? 'fill-amber-500' : ''}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Badges & Meta Info */}
