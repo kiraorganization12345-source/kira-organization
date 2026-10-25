@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Clock, MapPin, Compass, Sun, Moon } from 'lucide-react';
 import { PrayerTimes } from '../types';
 
-export const PrayerTimesView: React.FC = () => {
+interface PrayerTimesViewProps {
+  onBackToSurahs?: () => void;
+}
+
+export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({ onBackToSurahs }) => {
   const [selectedCity, setSelectedCity] = useState<string>('مكة المكرمة');
   const [prayers, setPrayers] = useState<PrayerTimes | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,20 +71,31 @@ export const PrayerTimesView: React.FC = () => {
           )}
         </div>
 
-        {/* City Selector */}
-        <div className="flex items-center gap-2 bg-stone-800 p-2 rounded-2xl border border-stone-700">
-          <MapPin className="w-4 h-4 text-amber-400" />
-          <select
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
-            className="bg-transparent text-xs font-bold text-stone-100 outline-none cursor-pointer"
-          >
-            {Object.keys(cityCoords).map(city => (
-              <option key={city} value={city} className="bg-stone-900 text-stone-100">
-                {city}
-              </option>
-            ))}
-          </select>
+        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+          {/* City Selector */}
+          <div className="flex items-center gap-2 bg-stone-800 p-2 rounded-2xl border border-stone-700">
+            <MapPin className="w-4 h-4 text-amber-400" />
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="bg-transparent text-xs font-bold text-stone-100 outline-none cursor-pointer"
+            >
+              {Object.keys(cityCoords).map(city => (
+                <option key={city} value={city} className="bg-stone-900 text-stone-100">
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {onBackToSurahs && (
+            <button
+              onClick={onBackToSurahs}
+              className="px-3.5 py-2 rounded-2xl bg-stone-800 hover:bg-amber-600 text-amber-200 hover:text-stone-950 border border-amber-500/30 text-xs font-bold transition-all shadow-md active:scale-95"
+            >
+              <span>← فهرس السور</span>
+            </button>
+          )}
         </div>
 
       </div>

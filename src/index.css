@@ -1,5 +1,114 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: #f59e0b;
+  --color-primary-hover: #d97706;
+  --color-primary-light: rgba(245, 158, 11, 0.15);
+  --color-primary-rgb: 245, 158, 11;
+  --color-secondary: #d97706;
+  --color-bg: #000000;
+  --color-card: #0c0a09;
+  --color-card-secondary: #1c1917;
+  --color-border: rgba(245, 158, 11, 0.25);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #f5f5f4;
+  --color-text-secondary: #a8a29e;
+  --color-accent-glow: rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="emerald"] {
+  --color-primary: #10b981;
+  --color-primary-hover: #059669;
+  --color-primary-light: rgba(16, 185, 129, 0.15);
+  --color-primary-rgb: 16, 185, 129;
+  --color-secondary: #047857;
+  --color-border: rgba(16, 185, 129, 0.3);
+  --color-accent-glow: rgba(16, 185, 129, 0.35);
+}
+
+[data-theme="sapphire"] {
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-light: rgba(59, 130, 246, 0.15);
+  --color-primary-rgb: 59, 130, 246;
+  --color-secondary: #1d4ed8;
+  --color-border: rgba(59, 130, 246, 0.3);
+  --color-accent-glow: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="amethyst"] {
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #7c3aed;
+  --color-primary-light: rgba(139, 92, 246, 0.15);
+  --color-primary-rgb: 139, 92, 246;
+  --color-secondary: #6d28d9;
+  --color-border: rgba(139, 92, 246, 0.3);
+  --color-accent-glow: rgba(139, 92, 246, 0.35);
+}
+
+[data-theme="ruby"] {
+  --color-primary: #f43f5e;
+  --color-primary-hover: #e11d48;
+  --color-primary-light: rgba(244, 63, 94, 0.15);
+  --color-primary-rgb: 244, 63, 94;
+  --color-secondary: #be123c;
+  --color-border: rgba(244, 63, 94, 0.3);
+  --color-accent-glow: rgba(244, 63, 94, 0.35);
+}
+
+[data-theme="teal"] {
+  --color-primary: #06b6d4;
+  --color-primary-hover: #0891b2;
+  --color-primary-light: rgba(6, 182, 212, 0.15);
+  --color-primary-rgb: 6, 182, 212;
+  --color-secondary: #0e7490;
+  --color-border: rgba(6, 182, 212, 0.3);
+  --color-accent-glow: rgba(6, 182, 212, 0.35);
+}
+
+[data-theme="sepia"] {
+  --color-primary: #d97706;
+  --color-primary-hover: #b45309;
+  --color-primary-light: rgba(217, 119, 6, 0.15);
+  --color-primary-rgb: 217, 119, 6;
+  --color-secondary: #92400e;
+  --color-border: rgba(217, 119, 6, 0.3);
+  --color-accent-glow: rgba(217, 119, 6, 0.35);
+}
+
+/* Light mode overrides */
+[data-mode="light"], .light {
+  --color-bg: #f8fafc;
+  --color-card: #ffffff;
+  --color-card-secondary: #f1f5f9;
+  --color-border: rgba(0, 0, 0, 0.12);
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+}
+
+/* AMOLED Pure Black mode */
+[data-mode="amoled"] {
+  --color-bg: #000000;
+  --color-card: #000000;
+  --color-card-secondary: #0a0a0a;
+  --color-border: rgba(255, 255, 255, 0.14);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a3a3a3;
+}
+
+/* Warm Ivory / Sepia Light mode */
+[data-mode="warm"] {
+  --color-bg: #fbf7ee;
+  --color-card: #f5eedb;
+  --color-card-secondary: #ede3cc;
+  --color-border: rgba(180, 83, 9, 0.22);
+  --color-border-subtle: rgba(180, 83, 9, 0.1);
+  --color-text-primary: #291804;
+  --color-text-secondary: #78350f;
+}
+
 @layer utilities {
   .font-quran {
     font-family: 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
@@ -15,41 +124,57 @@
   }
 }
 
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
 /* Islamic Geometric Star Background Pattern */
 .islamic-bg-pattern {
-  background-color: #000000;
-  background-image: radial-gradient(rgba(217, 119, 6, 0.14) 1px, transparent 0),
-                    radial-gradient(rgba(217, 119, 6, 0.08) 1px, #000000 0);
+  background-color: var(--color-bg);
+  background-image: radial-gradient(rgba(var(--color-primary-rgb), 0.12) 1px, transparent 0),
+                    radial-gradient(rgba(var(--color-primary-rgb), 0.06) 1px, var(--color-bg) 0);
   background-size: 24px 24px;
   background-position: 0 0, 12px 12px;
 }
 
-/* Gold Gradient Text */
+/* Gold / Primary Gradient Text */
 .gold-text-gradient {
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+  background: linear-gradient(135deg, #fef08a 0%, var(--color-primary) 50%, var(--color-primary-hover) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Traditional Gold Border & Glow */
+/* Primary Glow Border */
 .gold-glow-border {
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 0 0 25px -5px rgba(217, 119, 6, 0.25);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 0 25px -5px var(--color-accent-glow);
 }
 
 /* Quranic Illuminated Manuscript Decorative Frame */
 .quran-frame {
   position: relative;
-  border: 2px solid rgba(217, 119, 6, 0.4);
-  box-shadow: inset 0 0 15px rgba(217, 119, 6, 0.08), 0 4px 20px rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--color-border);
+  box-shadow: inset 0 0 15px rgba(var(--color-primary-rgb), 0.08), 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 .quran-frame::before {
   content: '';
   position: absolute;
   inset: 4px;
-  border: 1px dashed rgba(217, 119, 6, 0.3);
+  border: 1px dashed var(--color-border);
   pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .quran-frame {
+    border-width: 1.5px;
+  }
+  .quran-frame::before {
+    inset: 2px;
+  }
 }
 
 /* Custom Quran Paper & Mushaf Theme Styles */
@@ -94,12 +219,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(180, 140, 75, 0.3);
+  background: rgba(var(--color-primary-rgb), 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(180, 140, 75, 0.6);
+  background: rgba(var(--color-primary-rgb), 0.6);
 }
 
 /* Quranic Ayah Number Frame decoration */
@@ -109,5 +234,198 @@
   align-items: center;
   justify-content: center;
   margin: 0 0.35rem;
+  font-size: 1.25em;
+  vertical-align: middle;
+  line-height: 1;
 }
+
+/* Fullscreen Overlay Animation GPU Acceleration */
+.fullscreen-overlay-enter {
+  transform: translate3d(0, 100%, 0);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.fullscreen-overlay-active {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  will-change: transform, opacity;
+}
+
+/* Gemini Pulsing Microphone Rings Animation */
+@keyframes geminiPulseRing {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0.7);
+  }
+  70% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 16px rgba(var(--color-primary-rgb), 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb), 0);
+  }
+}
+
+.gemini-mic-pulse {
+  animation: geminiPulseRing 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Material Design 3 Ripple & Tap Effects */
+.md-ripple {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.md-ripple:active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(245, 158, 11, 0.2);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: md-ripple-animation 0.3s ease-out;
+}
+
+@keyframes md-ripple-animation {
+  from {
+    opacity: 0.8;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+/* Android Device Screen Mockup Container Isolation */
+.android-device-screen {
+  transform: translateZ(0);
+  contain: paint;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Material Design 3 Bottom Sheet Animation */
+.md-bottom-sheet {
+  animation: md-sheet-slide-up 0.28s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+@keyframes md-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Android Scrollbar - ultra sleek & unobtrusive */
+.android-device-screen ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.android-device-screen ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.android-device-screen ::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.35);
+  border-radius: 9999px;
+}
+
+.android-device-screen ::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.7);
+}
+
+/* Modern Atmospheric & Creative UI Utilities */
+.glass-panel {
+  background: rgba(18, 16, 15, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+}
+
+.light .glass-panel, [data-mode="light"] .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.modern-card-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.modern-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -8px rgba(var(--color-primary-rgb), 0.22);
+}
+
+/* Equalizer Soundwave Animation */
+@keyframes soundwaveAnim1 {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+@keyframes soundwaveAnim2 {
+  0%, 100% { height: 14px; }
+  50% { height: 6px; }
+}
+@keyframes soundwaveAnim3 {
+  0%, 100% { height: 8px; }
+  50% { height: 20px; }
+}
+
+.soundwave-bar-1 { animation: soundwaveAnim1 0.8s ease-in-out infinite; }
+.soundwave-bar-2 { animation: soundwaveAnim2 0.9s ease-in-out infinite 0.2s; }
+.soundwave-bar-3 { animation: soundwaveAnim3 0.7s ease-in-out infinite 0.4s; }
+
+/* Radiant radial gradient background highlight */
+.radiant-hero-glow {
+  background: radial-gradient(circle at 50% 20%, rgba(var(--color-primary-rgb), 0.18), transparent 70%);
+}
+
+/* 3D Realistic Book Page Flip Keyframes */
+@keyframes flipForward3D {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+  }
+  100% {
+    transform: rotateY(-180deg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes flipBackward3D {
+  0% {
+    transform: rotateY(0deg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45);
+  }
+  100% {
+    transform: rotateY(180deg);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.animate-flip-forward {
+  animation: flipForward3D 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.animate-flip-backward {
+  animation: flipBackward3D 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+
 

@@ -2,6 +2,13 @@ import { Reciter } from '../types';
 
 export const RECITERS: Reciter[] = [
   {
+    id: 'Islam_Sobhi_128kbps',
+    name: 'إسلام صبحي',
+    subtext: 'حفص عن عاصم - تلاوات خاشعة وسكينة',
+    bitrate: '128kbps',
+    style: 'مرتل'
+  },
+  {
     id: 'Alafasy_128kbps',
     name: 'مشاري راشد العفاسي',
     subtext: 'حفص عن عاصم - مرتل',
@@ -189,27 +196,35 @@ export const getFullSurahAudioCandidateUrls = (reciterId: string, surahNum: numb
   const surahPadded = String(surahNum).padStart(3, '0');
   const candidates: string[] = [];
 
-  if (reciterId.includes('Refaat')) {
-    candidates.push(`https://server14.mp3quran.net/refaat/${surahPadded}.mp3`);
+  if (reciterId.includes('Islam_Sobhi') || reciterId.includes('islam')) {
+    candidates.push(`https://server14.mp3quran.net/islam/Rewayat-Hafs-A-n-Assem/${surahPadded}.mp3`);
+    candidates.push(`https://archive.org/download/islam-sobhi-complete-quran/${surahPadded}.mp3`);
+    candidates.push(`https://ia801503.us.archive.org/28/items/islam-sobhi-complete-quran/${surahPadded}.mp3`);
+    candidates.push(`https://download.quranicaudio.com/quran/islam_sobhi/${surahPadded}.mp3`);
+    candidates.push(`https://archive.org/download/Islam-Sobhi-Quran/${surahPadded}.mp3`);
+    candidates.push(`https://server8.mp3quran.net/afs/${surahPadded}.mp3`);
+  } else if (reciterId.includes('Refaat')) {
+    candidates.push(`https://server14.mp3quran.net/refat/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/mohamed_refaat/${surahPadded}.mp3`);
     candidates.push(`https://archive.org/download/Muhammad_Refaat_Full_Quran/${surahPadded}.mp3`);
   } else if (reciterId.includes('Metwally')) {
-    candidates.push(`https://server11.mp3quran.net/metwaly/${surahPadded}.mp3`);
-    candidates.push(`https://download.quranicaudio.com/quran/sayeed_al_metwally/${surahPadded}.mp3`);
     candidates.push(`https://archive.org/download/Elsayed-Metwally-Abdel-Aal/${surahPadded}.mp3`);
+    candidates.push(`https://download.quranicaudio.com/quran/sayeed_al_metwally/${surahPadded}.mp3`);
+    candidates.push(`https://server8.mp3quran.net/afs/${surahPadded}.mp3`);
   } else if (reciterId.includes('Basit_Murattal')) {
     candidates.push(`https://server7.mp3quran.net/basit/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/abdul_basit_murattal/${surahPadded}.mp3`);
   } else if (reciterId.includes('Basit_Mujawwad')) {
-    candidates.push(`https://server7.mp3quran.net/basit/Mujawwad/${surahPadded}.mp3`);
+    candidates.push(`https://server7.mp3quran.net/basit/Almusshaf-Al-Mojawwad/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/abdul_basit_mujawwad/${surahPadded}.mp3`);
   } else if (reciterId.includes('Husary_Mujawwad')) {
-    candidates.push(`https://server13.mp3quran.net/hssr/Mujawwad/${surahPadded}.mp3`);
+    candidates.push(`https://server13.mp3quran.net/husr/Almusshaf-Al-Mojawwad/${surahPadded}.mp3`);
+    candidates.push(`https://download.quranicaudio.com/quran/mahmood_khalil_al-husaree_mujawwad/${surahPadded}.mp3`);
   } else if (reciterId.includes('Husary')) {
-    candidates.push(`https://server13.mp3quran.net/hssr/${surahPadded}.mp3`);
+    candidates.push(`https://server13.mp3quran.net/husr/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/mahmood_khalil_al-husaree/${surahPadded}.mp3`);
   } else if (reciterId.includes('Minshawy_Mujawwad')) {
-    candidates.push(`https://server10.mp3quran.net/minsh/Mujawwad/${surahPadded}.mp3`);
+    candidates.push(`https://server10.mp3quran.net/minsh/Almusshaf-Al-Mojawwad/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/muhammad_siddeeq_al-minshawee_mujawwad/${surahPadded}.mp3`);
   } else if (reciterId.includes('Minshawy')) {
     candidates.push(`https://server10.mp3quran.net/minsh/${surahPadded}.mp3`);
@@ -218,7 +233,7 @@ export const getFullSurahAudioCandidateUrls = (reciterId: string, surahNum: numb
     candidates.push(`https://server8.mp3quran.net/mustafa/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/mustafa_ismail/${surahPadded}.mp3`);
   } else if (reciterId.includes('Tablaway')) {
-    candidates.push(`https://server10.mp3quran.net/tblba/${surahPadded}.mp3`);
+    candidates.push(`https://server12.mp3quran.net/tblawi/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/mohammad_al_tablaway/${surahPadded}.mp3`);
   } else if (reciterId.includes('Sudais')) {
     candidates.push(`https://server11.mp3quran.net/sds/${surahPadded}.mp3`);
@@ -227,9 +242,11 @@ export const getFullSurahAudioCandidateUrls = (reciterId: string, surahNum: numb
     candidates.push(`https://server12.mp3quran.net/maher/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/maher_256/${surahPadded}.mp3`);
   } else if (reciterId.includes('Shuraym')) {
-    candidates.push(`https://server7.mp3quran.net/shri/${surahPadded}.mp3`);
+    candidates.push(`https://server12.mp3quran.net/shoraimy/${surahPadded}.mp3`);
+    candidates.push(`https://download.quranicaudio.com/quran/sa3ood_al-shuraym/${surahPadded}.mp3`);
   } else if (reciterId.includes('Dussary')) {
     candidates.push(`https://server11.mp3quran.net/yasser/${surahPadded}.mp3`);
+    candidates.push(`https://download.quranicaudio.com/quran/yasser_ad-dussary/${surahPadded}.mp3`);
   } else if (reciterId.includes('Shaatree')) {
     candidates.push(`https://server11.mp3quran.net/shatri/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/abu_bakr_ash-shaatree/${surahPadded}.mp3`);
@@ -243,10 +260,11 @@ export const getFullSurahAudioCandidateUrls = (reciterId: string, surahNum: numb
     candidates.push(`https://server6.mp3quran.net/qtm/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/nasser_alqatami/${surahPadded}.mp3`);
   } else if (reciterId.includes('banna')) {
+    candidates.push(`https://cdn.mp3quran.net/audio/mahmoud-banna/r1/${surahPadded}.mp3`);
     candidates.push(`https://server8.mp3quran.net/bna/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/mahmoud_ali_al_banna/${surahPadded}.mp3`);
   } else if (reciterId.includes('Hudhaify')) {
-    candidates.push(`https://server9.mp3quran.net/hudhaify/${surahPadded}.mp3`);
+    candidates.push(`https://server9.mp3quran.net/hthfi/${surahPadded}.mp3`);
     candidates.push(`https://download.quranicaudio.com/quran/ali_huthayfi/${surahPadded}.mp3`);
   } else {
     // Default Alafasy

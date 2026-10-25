@@ -1,0 +1,64 @@
+{
+  "name": "موقع التوبة - القرآن الكريم",
+  "short_name": "التوبة",
+  "description": "موقع التوبة الشامل لقراءة واستماع وتفسير القرآن الكريم بالتلاوات العذبة لمشاهير القراء مع خيار متابعة الآيات.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "dir": "rtl",
+  "lang": "ar",
+  "categories": ["lifestyle", "books", "education"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المصحف الشريف",
+      "short_name": "المصحف",
+      "description": "تصفح وقراءة سور القرآن الكريم برواية حفص عن عاصم",
+      "url": "/?view=surahs",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "المساعد القرآني الذكي",
+      "short_name": "المساعد",
+      "description": "تدبر وتفسير آيات القرآن الكريم بالصوت والذكاء الاصطناعي",
+      "url": "/?view=ai-assistant",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "أوقات الصلاة والقبلة",
+      "short_name": "الصلوات",
+      "description": "مواقيت الصلاة اليومية واتجاه القبلة",
+      "url": "/?view=prayer-times",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "أذكار المسلم",
+      "short_name": "الأذكار",
+      "description": "أذكار الصباح والمساء وحصن المسلم",
+      "url": "/?view=athkar",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -97,6 +97,78 @@ export const TRACKING_COLORS: TrackingColorConfig[] = [
     bannerBadgeClasses: 'bg-orange-500 text-stone-950 font-bold',
     borderAccent: 'border-orange-500',
     swatchClass: 'bg-orange-500'
+  },
+  {
+    id: 'indigo',
+    name: 'نيلي كحلي',
+    subtext: 'السافير العميق والراقي',
+    hex: '#6366f1',
+    badgeBg: 'bg-indigo-500',
+    cardActiveClasses: 'bg-indigo-500/15 border-r-[6px] border-r-indigo-500 border-indigo-500/70 shadow-lg shadow-indigo-500/5',
+    inlineActiveClasses: 'bg-indigo-400/35 dark:bg-indigo-400/30 text-indigo-950 dark:text-indigo-100 font-bold',
+    bannerBadgeClasses: 'bg-indigo-500 text-white font-bold',
+    borderAccent: 'border-indigo-500',
+    swatchClass: 'bg-indigo-500'
+  },
+  {
+    id: 'rose',
+    name: 'وردي زهر الرمان',
+    subtext: 'الوردي الفاتن اللطيف',
+    hex: '#ec4899',
+    badgeBg: 'bg-pink-500',
+    cardActiveClasses: 'bg-pink-500/15 border-r-[6px] border-r-pink-500 border-pink-500/70 shadow-lg shadow-pink-500/5',
+    inlineActiveClasses: 'bg-pink-400/35 dark:bg-pink-400/30 text-pink-950 dark:text-pink-100 font-bold',
+    bannerBadgeClasses: 'bg-pink-500 text-white font-bold',
+    borderAccent: 'border-pink-500',
+    swatchClass: 'bg-pink-500'
+  },
+  {
+    id: 'mint',
+    name: 'أخضر نعناعي',
+    subtext: 'النضارة والإشراق',
+    hex: '#10b981',
+    badgeBg: 'bg-emerald-400',
+    cardActiveClasses: 'bg-emerald-400/20 border-r-[6px] border-r-emerald-400 border-emerald-400/80 shadow-lg shadow-emerald-400/5',
+    inlineActiveClasses: 'bg-emerald-300/40 dark:bg-emerald-400/35 text-emerald-950 dark:text-emerald-50 font-bold',
+    bannerBadgeClasses: 'bg-emerald-400 text-stone-950 font-bold',
+    borderAccent: 'border-emerald-400',
+    swatchClass: 'bg-emerald-400'
+  },
+  {
+    id: 'gold',
+    name: 'أصفر مذهب نقي',
+    subtext: 'إشعاع التذهيب القرآني',
+    hex: '#eab308',
+    badgeBg: 'bg-yellow-400',
+    cardActiveClasses: 'bg-yellow-400/20 border-r-[6px] border-r-yellow-400 border-yellow-400/80 shadow-lg shadow-yellow-400/5',
+    inlineActiveClasses: 'bg-yellow-300/45 dark:bg-yellow-400/35 text-yellow-950 dark:text-yellow-50 font-bold',
+    bannerBadgeClasses: 'bg-yellow-400 text-stone-950 font-bold',
+    borderAccent: 'border-yellow-400',
+    swatchClass: 'bg-yellow-400'
+  },
+  {
+    id: 'bronze',
+    name: 'بني عثماني نحاسي',
+    subtext: 'المخطوطات القديمة',
+    hex: '#b45309',
+    badgeBg: 'bg-amber-700',
+    cardActiveClasses: 'bg-amber-700/20 border-r-[6px] border-r-amber-700 border-amber-700/80 shadow-lg shadow-amber-700/5',
+    inlineActiveClasses: 'bg-amber-600/35 dark:bg-amber-600/30 text-amber-950 dark:text-amber-100 font-bold',
+    bannerBadgeClasses: 'bg-amber-700 text-amber-100 font-bold',
+    borderAccent: 'border-amber-700',
+    swatchClass: 'bg-amber-700'
+  },
+  {
+    id: 'silver',
+    name: 'فضي بلاتيني',
+    subtext: 'هادئ ومحايد للمصحف',
+    hex: '#94a3b8',
+    badgeBg: 'bg-slate-400',
+    cardActiveClasses: 'bg-slate-500/20 border-r-[6px] border-r-slate-400 border-slate-400/80 shadow-lg shadow-slate-400/5',
+    inlineActiveClasses: 'bg-slate-400/35 dark:bg-slate-400/30 text-slate-950 dark:text-slate-100 font-bold',
+    bannerBadgeClasses: 'bg-slate-400 text-stone-950 font-bold',
+    borderAccent: 'border-slate-400',
+    swatchClass: 'bg-slate-400'
   }
 ];
 

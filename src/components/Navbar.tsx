@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BookOpen, 
   FileText, 
@@ -19,11 +19,24 @@ import {
   Headphones,
   Minimize2,
   Maximize2,
-  EyeOff
+  EyeOff,
+  Smartphone,
+  Palette,
+  BarChart3,
+  Bell,
+  Radio,
+  Trophy,
+  ChevronDown,
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
-import { ViewMode, PaperTheme, FontStyle, Reciter, NavDisplayMode, TrackingHighlightColor } from '../types';
+import { ViewMode, PaperTheme, FontStyle, Reciter, NavDisplayMode, TrackingHighlightColor, QuranTextColor, NavThemeColor, GlobalTheme, SiteMode } from '../types';
 import { RECITERS } from '../data/reciters';
 import { TRACKING_COLORS } from '../data/highlightColors';
+import { QURAN_TEXT_COLOR_OPTIONS, NAV_THEME_OPTIONS, getNavThemeConfig } from '../data/quranThemes';
+import { toArabicNumeral } from '../services/quranApi';
+import { useKhatmProgress } from '../services/khatmProgressService';
+import { KhatmCelebrationCanvas } from './KhatmCelebrationCanvas';
 import quranBrandIcon from '../assets/images/quran_brand_icon_1786468911622.jpg';
 
 interface NavbarProps {
@@ -39,7 +52,7 @@ interface NavbarProps {
   setFontStyle: (s: FontStyle) => void;
   bookmarkCount: number;
   onOpenSearch: () => void;
-  siteMode?: 'dark' | 'light';
+  siteMode?: SiteMode;
   onToggleSiteMode?: () => void;
   eyeComfortMode?: boolean;
   onToggleEyeComfortMode?: () => void;
@@ -49,8 +62,18 @@ interface NavbarProps {
   onSetNavDisplayMode?: (mode: NavDisplayMode) => void;
   trackingColor?: TrackingHighlightColor;
   onSetTrackingColor?: (color: TrackingHighlightColor) => void;
+  quranTextColor?: QuranTextColor;
+  onSetQuranTextColor?: (color: QuranTextColor) => void;
+  navTheme?: NavThemeColor;
+  onSetNavTheme?: (theme: NavThemeColor) => void;
   isListeningMode?: boolean;
   onToggleListeningMode?: () => void;
+  onOpenQuranModeModal?: () => void;
+  globalTheme?: GlobalTheme;
+  onOpenThemeSwitcher?: () => void;
+  onOpenAndroidInstall?: () => void;
+  onOpenNotifications?: () => void;
+  onOpenLiveVoice?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -76,12 +99,87 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSetNavDisplayMode,
   trackingColor = 'amber',
   onSetTrackingColor,
+  quranTextColor = 'default',
+  onSetQuranTextColor,
+  navTheme = 'stone',
+  onSetNavTheme,
   isListeningMode = false,
-  onToggleListeningMode
+  onToggleListeningMode,
+  onOpenQuranModeModal,
+  globalTheme = 'amber',
+  onOpenThemeSwitcher,
+  onOpenAndroidInstall,
+  onOpenNotifications,
+  onOpenLiveVoice
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mushafColorMenuOpen, setMushafColorMenuOpen] = useState(false);
+  const { progress: khatmProgress, syncPages } = useKhatmProgress();
+  const [khatmDropdownOpen, setKhatmDropdownOpen] = useState(false);
+  const [celebrationKey, setCelebrationKey] = useState(0);
+  const prevIsCompletedRef = useRef(khatmProgress.isCompleted);
+
+  // Smart Navigation Auto-Hide & Reveal on Scroll with smooth effects
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY || window.pageYOffset || 0;
+          setIsScrolled(currentScrollY > 15);
+
+          // If near top (within 70px), always show navbar
+          if (currentScrollY < 70) {
+            setIsNavVisible(true);
+          } else if (currentScrollY > lastScrollYRef.current + 8) {
+            // Scrolling down -> hide navbar seamlessly with effects
+            setIsNavVisible(false);
+            setSettingsOpen(false);
+            setMushafColorMenuOpen(false);
+            setKhatmDropdownOpen(false);
+          } else if (currentScrollY < lastScrollYRef.current - 10) {
+            // Scrolling up -> reveal smoothly
+            setIsNavVisible(true);
+          }
+          lastScrollYRef.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Trigger celebratory canvas animation when user reaches 100% milestone
+  useEffect(() => {
+    if (khatmProgress.isCompleted && !prevIsCompletedRef.current) {
+      setCelebrationKey((prev) => prev + 1);
+    }
+    prevIsCompletedRef.current = khatmProgress.isCompleted;
+  }, [khatmProgress.isCompleted]);
+
+  const triggerKhatmCelebration = () => {
+    setCelebrationKey((prev) => prev + 1);
+  };
+
+  const handleTestMilestoneCompletion = () => {
+    const allPages = Array.from({ length: 604 }, (_, i) => i + 1);
+    syncPages(allPages);
+    setCelebrationKey((prev) => prev + 1);
+  };
+
+  const handleResetKhatmProgress = () => {
+    syncPages([1]);
+  };
+
+  const navThemeConfig = getNavThemeConfig(navTheme);
 
   const mushafThemes: { id: PaperTheme; name: string; bgClass: string; borderClass: string; textColor: string }[] = [
     { id: 'dark', name: 'أسود ملكي', bgClass: 'bg-[#0c0a09]', borderClass: 'border-amber-500/60', textColor: 'text-amber-200' },
@@ -94,18 +192,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems: { id: ViewMode; label: string; icon: React.ReactNode }[] = [
     { id: 'surahs', label: 'المصحف (السور)', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'ai_assistant', label: 'وضع الذكاء الاصطناعي', icon: <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" /> },
+    { id: 'realistic_book', label: 'مصحف ثلاثي الأبعاد 3D', icon: <BookOpen className="w-4 h-4 text-amber-400" /> },
     { id: 'mushaf_page', label: 'قراءة بالصفحات', icon: <FileText className="w-4 h-4" /> },
+    { id: 'listening', label: 'وضع الاستماع', icon: <Headphones className="w-4 h-4 text-teal-400" /> },
+    { id: 'stats', label: 'إحصائيات القراءة', icon: <BarChart3 className="w-4 h-4 text-emerald-400" /> },
     { id: 'khatma', label: 'خطة الختمة', icon: <Calendar className="w-4 h-4" /> },
+    { id: 'ai_assistant', label: 'وضع الذكاء الاصطناعي', icon: <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" /> },
     { id: 'athkar', label: 'الأذكار والادعية', icon: <Heart className="w-4 h-4" /> },
     { id: 'prayers', label: 'أوقات الصلاة', icon: <Clock className="w-4 h-4" /> },
     { id: 'bookmarks', label: 'المحفوظات', icon: <Bookmark className="w-4 h-4" /> }
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-black/95 text-stone-100 backdrop-blur-xl border-b border-amber-500/30 shadow-2xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <header className={`sticky top-0 z-40 text-stone-100 backdrop-blur-2xl border-b transition-all duration-300 transform ${
+      isNavVisible ? 'translate-y-0 opacity-100 shadow-2xl' : '-translate-y-full opacity-0 pointer-events-none'
+    } ${
+      isScrolled 
+        ? 'bg-black/95 border-amber-500/40 shadow-[0_10px_35px_-10px_rgba(0,0,0,0.9)] ring-1 ring-amber-400/20' 
+        : 'bg-black/90 border-amber-500/25 shadow-lg'
+    }`}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-1 sm:gap-2">
           
           {/* Logo & Title */}
           <div className="flex items-center space-x-3 space-x-reverse cursor-pointer group" onClick={() => setActiveView('surahs')}>
@@ -160,11 +267,287 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Action Controls */}
           <div className="flex items-center space-x-2 space-x-reverse">
             
+            {/* Khatm Completion Progress Widget in Main Header */}
+            <div className="relative">
+              <button
+                onClick={() => setKhatmDropdownOpen(!khatmDropdownOpen)}
+                className={`flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-b ${
+                  khatmProgress.isCompleted
+                    ? 'from-amber-950/80 via-stone-900 to-emerald-950/80 border-amber-400 text-amber-200 ring-2 ring-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.35)]'
+                    : 'from-stone-900 via-stone-900/95 to-stone-950 hover:from-stone-850 hover:to-stone-900 text-stone-200 border-amber-500/40 hover:border-amber-400'
+                } text-xs font-bold transition-all shadow-md shadow-amber-950/25 group shrink-0 relative`}
+                title="نسبة ختم القرآن الكريم - انقر لعرض التفاصيل وخطة الختمة"
+                aria-label="نسبة ختم القرآن الكريم"
+              >
+                <div className={`relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-lg ${
+                  khatmProgress.isCompleted
+                    ? 'bg-amber-400 text-stone-950 border border-amber-300 shadow-md animate-bounce'
+                    : 'bg-amber-500/15 border border-amber-400/40 text-amber-400 group-hover:scale-105'
+                } transition-transform shrink-0`}>
+                  <Trophy className="w-3.5 h-3.5" />
+                </div>
+
+                <div className="flex flex-col text-right">
+                  <div className="flex items-center gap-1.5 justify-between">
+                    <span className="font-extrabold text-[11px] sm:text-xs text-amber-200 flex items-center gap-1">
+                      <span>الختمة</span>
+                      {khatmProgress.isCompleted && (
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/30 text-emerald-300 border border-emerald-400/50 font-sans">
+                          تمت 🌟
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">
+                      {khatmProgress.percentageFormatted}
+                    </span>
+                  </div>
+                  
+                  <div className="relative flex items-center gap-1.5 mt-0.5">
+                    {/* Progress Bar Track */}
+                    <div className="relative w-14 sm:w-24 md:w-28 h-2 bg-black rounded-full overflow-hidden border border-stone-800">
+                      <div
+                        className={`h-full ${
+                          khatmProgress.isCompleted
+                            ? 'bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300 animate-pulse'
+                            : 'bg-gradient-to-r from-emerald-500 via-amber-400 to-amber-300'
+                        } rounded-full transition-all duration-700 ease-out shadow-[0_0_6px_rgba(245,158,11,0.6)]`}
+                        style={{ width: `${Math.min(100, Math.max(khatmProgress.completedPagesCount > 0 ? 2 : 0, khatmProgress.percentage))}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-mono hidden xs:inline">
+                      {toArabicNumeral(khatmProgress.completedPagesCount)}/٦٠٤
+                    </span>
+
+                    {/* Subtle canvas celebration particles floating directly on the progress bar on 100% completion */}
+                    {khatmProgress.isCompleted && (
+                      <div className="absolute -inset-x-2 -inset-y-3 pointer-events-none">
+                        <KhatmCelebrationCanvas
+                          isCompleted={khatmProgress.isCompleted}
+                          triggerKey={celebrationKey}
+                          density="subtle"
+                          ambientGlow={true}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <ChevronDown className={`w-3.5 h-3.5 text-stone-400 group-hover:text-amber-300 transition-transform ${khatmDropdownOpen ? 'rotate-180 text-amber-400' : ''}`} />
+              </button>
+
+              {/* Interactive Khatm Details Popover */}
+              {khatmDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setKhatmDropdownOpen(false)} />
+                  <div className="absolute left-0 sm:right-0 mt-2 w-72 sm:w-80 p-4 bg-stone-950/98 border border-amber-500/40 rounded-2xl shadow-2xl z-50 space-y-3.5 backdrop-blur-2xl">
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-800">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                          <Trophy className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-amber-100">ختمة القرآن الكريم</h4>
+                          <p className="text-[10px] text-stone-400">معدل الإنجاز التراكمي لصفحات المصحف</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setKhatmDropdownOpen(false)}
+                        className="p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-900"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {/* Milestone Celebratory Card if 100% Completed */}
+                    {khatmProgress.isCompleted && (
+                      <div className="relative overflow-hidden p-3 rounded-2xl bg-gradient-to-r from-amber-950/80 via-stone-900 to-emerald-950/80 border border-amber-400/80 text-center space-y-2 shadow-xl">
+                        <KhatmCelebrationCanvas isCompleted={true} triggerKey={celebrationKey} density="vibrant" />
+                        <div className="flex items-center justify-center gap-1.5 text-amber-300 font-black text-xs">
+                          <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+                          <span>مبارك! تم ختم القرآن الكريم كاملاً بحمد الله</span>
+                          <Sparkles className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <p className="text-[10px] text-stone-300 leading-relaxed">
+                          هنيئاً لك هذا الأجر العظيم ومبارك إتمام قراءة المصحف الشريف كاملاً (٦٠٤ صفحة).
+                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            triggerKhatmCelebration();
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black transition-all shadow-md active:scale-95 cursor-pointer"
+                        >
+                          <span>🎉 إعادة عرض الاحتفال بالختمة</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Progress Bar & Metrics */}
+                    <div className="space-y-2 bg-stone-900/80 p-3 rounded-xl border border-stone-800/80 relative">
+                      <div className="flex items-center justify-between text-xs font-bold">
+                        <span className="text-stone-300">نسبة الإنجاز في المصحف</span>
+                        <span className="text-amber-400 font-extrabold text-sm font-mono">
+                          {khatmProgress.percentageFormatted}
+                        </span>
+                      </div>
+
+                      <div className="relative w-full h-3 bg-black rounded-full overflow-hidden border border-stone-700/80 p-0.5">
+                        <div
+                          className={`h-full ${
+                            khatmProgress.isCompleted
+                              ? 'bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300 animate-pulse'
+                              : 'bg-gradient-to-r from-emerald-500 via-amber-400 to-amber-300'
+                          } rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(245,158,11,0.6)]`}
+                          style={{ width: `${Math.min(100, Math.max(khatmProgress.completedPagesCount > 0 ? 1 : 0, khatmProgress.percentage))}%` }}
+                        />
+                        {khatmProgress.isCompleted && (
+                          <div className="absolute inset-0 pointer-events-none">
+                            <KhatmCelebrationCanvas
+                              isCompleted={true}
+                              triggerKey={celebrationKey}
+                              density="subtle"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                        <div className="bg-black/60 p-2 rounded-lg border border-stone-800">
+                          <div className="text-stone-400 text-[10px]">الصفحات المقروءة</div>
+                          <div className="text-amber-200 font-extrabold text-xs">
+                            {toArabicNumeral(khatmProgress.completedPagesCount)} <span className="text-[10px] text-stone-400">من ٦٠٤</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/60 p-2 rounded-lg border border-stone-800">
+                          <div className="text-stone-400 text-[10px]">الصفحات المتبقية</div>
+                          <div className="text-emerald-300 font-extrabold text-xs">
+                            {toArabicNumeral(khatmProgress.remainingPages)} <span className="text-[10px] text-stone-400">صفحة</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/60 p-2 rounded-lg border border-stone-800">
+                          <div className="text-stone-400 text-[10px]">الأجزاء المنجزة</div>
+                          <div className="text-sky-300 font-extrabold text-xs">
+                            ~{toArabicNumeral(khatmProgress.estimatedJuzCompleted)} <span className="text-[10px] text-stone-400">من ٣٠</span>
+                          </div>
+                        </div>
+                        <div className="bg-black/60 p-2 rounded-lg border border-stone-800">
+                          <div className="text-stone-400 text-[10px]">قراءة اليوم</div>
+                          <div className="text-amber-400 font-extrabold text-xs">
+                            {toArabicNumeral(khatmProgress.todayPagesCount)} <span className="text-[10px] text-stone-400">صفحة</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick navigation actions */}
+                    <div className="space-y-1.5 pt-1">
+                      <button
+                        onClick={() => {
+                          setKhatmDropdownOpen(false);
+                          setActiveView('khatma');
+                        }}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs transition-colors shadow-md shadow-amber-950/30"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Calendar className="w-3.5 h-3.5" />
+                          عرض ومتابعة خطة الختمة
+                        </span>
+                        <span className="text-[10px] bg-stone-950/20 px-1.5 py-0.2 rounded font-bold">انتقال</span>
+                      </button>
+
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          onClick={() => {
+                            setKhatmDropdownOpen(false);
+                            setActiveView('stats');
+                          }}
+                          className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-800 text-[11px] font-bold transition-colors"
+                        >
+                          <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>إحصائيات القراءة</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setKhatmDropdownOpen(false);
+                            setActiveView('mushaf_page');
+                          }}
+                          className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-800 text-[11px] font-bold transition-colors"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-amber-400" />
+                          <span>متابعة القراءة</span>
+                        </button>
+                      </div>
+
+                      {/* Milestone Testing & Reset Controls */}
+                      <div className="pt-2 border-t border-stone-800/80 flex items-center justify-between text-[10px]">
+                        {!khatmProgress.isCompleted ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTestMilestoneCompletion();
+                            }}
+                            className="text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1 transition-colors"
+                            title="تجربة تفعيل احتفال إكمال الختمة ١٠٠٪ مباشرة"
+                          >
+                            <span>✨ تجربة إكمال الختمة (١٠٠٪)</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleResetKhatmProgress();
+                            }}
+                            className="text-stone-400 hover:text-amber-300 hover:underline flex items-center gap-1 transition-colors"
+                            title="إعادة ضبط الصفحات للبدء من جديد"
+                          >
+                            <RefreshCw className="w-3 h-3" />
+                            <span>بدء ختمة جديدة</span>
+                          </button>
+                        )}
+                        <span className="text-stone-500 font-mono text-[9px]">تحديث فوري تلقائي</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Live Voice Conversation Button (Gemini 3.8 Live API) */}
+            {onOpenLiveVoice && (
+              <button
+                onClick={onOpenLiveVoice}
+                className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-amber-400/30 to-amber-500/20 hover:bg-amber-500/35 text-amber-200 border border-amber-400/60 text-xs sm:text-sm font-extrabold shadow-md shadow-amber-950/30 transition-all hover:scale-105 active:scale-95 group"
+                title="محادثة صوتية حية فورية ومباشرة (Gemini 3.8 Live API)"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <Radio className="w-4 h-4 text-amber-400 group-hover:animate-pulse shrink-0" />
+                <span className="font-extrabold whitespace-nowrap">محادثة حية</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500 text-stone-950 font-black">Live</span>
+              </button>
+            )}
+
+            {/* Main Feature Button: تشغيل وضع القرآن */}
+            {onOpenQuranModeModal && (
+              <button
+                onClick={onOpenQuranModeModal}
+                className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-500 text-stone-950 border border-amber-300 text-xs sm:text-sm font-extrabold shadow-lg shadow-amber-950/40 transition-all hover:scale-105 active:scale-95"
+                title="مشغل القرآن الصوتي (مشغل صوتي احترافي لجميع السور)"
+              >
+                <Headphones className="w-4 h-4 text-stone-950 animate-bounce" />
+                <span className="font-extrabold whitespace-nowrap hidden md:inline">مشغل القرآن الصوتي</span>
+                <span className="font-extrabold whitespace-nowrap md:hidden">المشغل</span>
+              </button>
+            )}
+
             {/* Background Audio Active Indicator & Restorer Button */}
             {isAudioActiveInBackground && onRestoreAudioPlayer && (
               <button
                 onClick={onRestoreAudioPlayer}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 text-xs font-bold transition-all animate-pulse shadow-md"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/50 text-xs font-bold transition-all animate-pulse shadow-md"
                 title="التلاوة مستمرة في الخلفية - انقر لإظهار المشغل"
               >
                 <Headphones className="w-4 h-4 text-amber-400 animate-bounce" />
@@ -175,7 +558,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Search Button */}
             <button
               onClick={onOpenSearch}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs sm:text-sm border border-stone-800 transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-200 text-xs sm:text-sm border border-stone-800 transition-colors"
               title="بحث في الآيات والسور"
             >
               <Search className="w-4 h-4 text-amber-400" />
@@ -186,7 +569,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {onToggleListeningMode && (
               <button
                 onClick={onToggleListeningMode}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 text-xs font-bold transition-all shadow-sm group"
+                className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:border-amber-400 text-xs font-bold transition-all shadow-sm group"
                 title="تفعيل وضع الاستماع الخاشع (إخفاء كافة الأشرطة والقوائم للتركيز التام مع استمرار الصوت)"
               >
                 <Headphones className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
@@ -194,11 +577,48 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
+            {/* Global Color Theme Switcher Button */}
+            {onOpenThemeSwitcher && (
+              <button
+                onClick={onOpenThemeSwitcher}
+                className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-300 border border-stone-800 hover:border-amber-500/40 text-xs font-bold transition-all shadow-sm"
+                title="تخصيص ألوان وسمة الموقع"
+              >
+                <Palette className="w-4 h-4 text-amber-400" />
+                <span className="hidden lg:inline">السمات والألوان</span>
+              </button>
+            )}
+
+            {/* Daily Notifications Button */}
+            {onOpenNotifications && (
+              <button
+                onClick={onOpenNotifications}
+                className="hidden md:flex relative items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 text-amber-300 border border-stone-800 hover:border-amber-500/40 text-xs font-bold transition-all shadow-sm group"
+                title="ضبط تنبيهات وإشعارات الورد القرآني اليومي"
+              >
+                <Bell className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span className="hidden lg:inline">منبّه الورد</span>
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+              </button>
+            )}
+
+            {/* Android App Button */}
+            {onOpenAndroidInstall && (
+              <button
+                onClick={onOpenAndroidInstall}
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 text-xs font-bold transition-all shadow-sm group"
+                title="تثبيت وتحميل تطبيق أندرويد (Android App)"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span>تطبيق أندرويد</span>
+              </button>
+            )}
+
             {/* Direct Day / Night Switcher */}
             {onToggleSiteMode && (
               <button
                 onClick={onToggleSiteMode}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shadow-sm ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shadow-sm ${
                   siteMode === 'dark'
                     ? 'bg-stone-900 hover:bg-stone-800 text-amber-300 border-amber-500/40'
                     : 'bg-amber-100 hover:bg-amber-200 text-stone-900 border-amber-300'
@@ -208,12 +628,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {siteMode === 'dark' ? (
                   <>
                     <Moon className="w-4 h-4 text-amber-400" />
-                    <span className="hidden sm:inline">وضع ليلي</span>
+                    <span className="hidden md:inline">وضع ليلي</span>
                   </>
                 ) : (
                   <>
                     <Sun className="w-4 h-4 text-amber-600" />
-                    <span className="hidden sm:inline">وضع نهاري</span>
+                    <span className="hidden md:inline">وضع نهاري</span>
                   </>
                 )}
               </button>
@@ -508,6 +928,80 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
 
+              {/* Navigation Bar Color Theme */}
+              {onSetNavTheme && (
+                <div className="space-y-2 pt-2 border-t border-stone-800">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                      <Compass className="w-4 h-4" />
+                      ألوان ونمط شريط التنقل
+                    </label>
+                    <span className="text-[10px] text-stone-400">
+                      {NAV_THEME_OPTIONS.find(t => t.id === navTheme)?.name}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {NAV_THEME_OPTIONS.map((themeOpt) => {
+                      const isSelected = navTheme === themeOpt.id;
+                      return (
+                        <button
+                          key={themeOpt.id}
+                          onClick={() => onSetNavTheme(themeOpt.id)}
+                          className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold border text-right transition-all ${
+                            isSelected
+                              ? 'bg-stone-800 border-amber-400 shadow-md ring-2 ring-amber-500/20'
+                              : 'bg-stone-900/90 border-stone-800 text-stone-300 hover:bg-stone-800 hover:text-white'
+                          }`}
+                        >
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm border border-stone-600"
+                            style={{ backgroundColor: themeOpt.previewHex }}
+                          />
+                          <span className="truncate text-[11px]">{themeOpt.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Quranic Text Color Controller */}
+              {onSetQuranTextColor && (
+                <div className="space-y-2 pt-2 border-t border-stone-800">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                      <Type className="w-4 h-4" />
+                      لون النص القرآني الشريف
+                    </label>
+                    <span className="text-[10px] text-stone-400">
+                      {QURAN_TEXT_COLOR_OPTIONS.find(c => c.id === quranTextColor)?.name}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {QURAN_TEXT_COLOR_OPTIONS.map((txtOpt) => {
+                      const isSelected = quranTextColor === txtOpt.id;
+                      return (
+                        <button
+                          key={txtOpt.id}
+                          onClick={() => onSetQuranTextColor(txtOpt.id)}
+                          className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold border text-right transition-all ${
+                            isSelected
+                              ? 'bg-stone-800 border-amber-400 shadow-md ring-2 ring-amber-500/20'
+                              : 'bg-stone-900/90 border-stone-800 text-stone-300 hover:bg-stone-800 hover:text-white'
+                          }`}
+                        >
+                          <span
+                            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm border border-stone-500"
+                            style={{ backgroundColor: txtOpt.previewHex }}
+                          />
+                          <span className="truncate text-[11px]">{txtOpt.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Verse Tracking Highlight Color Controller */}
               {onSetTrackingColor && (
                 <div className="space-y-2 pt-2 border-t border-stone-800">
@@ -577,7 +1071,137 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-stone-900 border-b border-stone-800 px-4 py-3 space-y-1">
+        <div className="lg:hidden bg-stone-900 border-b border-stone-800 px-4 py-3 space-y-1.5">
+          {/* Featured Khatm Completion Card in Mobile Drawer */}
+          <div 
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setActiveView('khatma');
+            }}
+            className={`bg-gradient-to-br ${
+              khatmProgress.isCompleted
+                ? 'from-amber-950/80 via-stone-900 to-emerald-950/80 border-amber-400 ring-2 ring-amber-400/30'
+                : 'from-stone-950 to-stone-900 border-amber-500/40'
+            } p-3.5 rounded-2xl border shadow-lg space-y-2.5 mb-2 cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden`}
+          >
+            {khatmProgress.isCompleted && (
+              <KhatmCelebrationCanvas isCompleted={true} triggerKey={celebrationKey} density="subtle" />
+            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${khatmProgress.isCompleted ? 'bg-amber-400 text-stone-950 animate-bounce' : 'bg-amber-500/20 text-amber-400'} border border-amber-500/30`}>
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-extrabold text-amber-100 flex items-center gap-1.5">
+                    <span>ختمة المصحف الشريف</span>
+                    {khatmProgress.isCompleted ? (
+                      <span className="text-[10px] text-emerald-300 font-bold bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-500/40 font-sans">
+                        مكتملة بحمد الله 🌟
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-amber-400 font-normal">(انقر لعرض الخطة)</span>
+                    )}
+                  </h4>
+                  <span className="text-[10px] text-stone-400">
+                    {toArabicNumeral(khatmProgress.completedPagesCount)} من ٦٠٤ صفحة مقروءة
+                  </span>
+                </div>
+              </div>
+              <span className="text-xs font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">
+                {khatmProgress.percentageFormatted}
+              </span>
+            </div>
+
+            <div className="relative w-full h-2.5 bg-black rounded-full overflow-hidden border border-stone-800 p-0.5">
+              <div
+                className={`h-full ${
+                  khatmProgress.isCompleted
+                    ? 'bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300 animate-pulse'
+                    : 'bg-gradient-to-r from-emerald-500 via-amber-400 to-amber-300'
+                } rounded-full transition-all duration-700 ease-out shadow-[0_0_8px_rgba(245,158,11,0.6)]`}
+                style={{ width: `${Math.min(100, Math.max(khatmProgress.completedPagesCount > 0 ? 1 : 0, khatmProgress.percentage))}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] pt-0.5 text-stone-300">
+              <span>المتبقي: <strong className="text-emerald-300">{toArabicNumeral(khatmProgress.remainingPages)}</strong> صفحة</span>
+              <span>اليوم: <strong className="text-amber-400">{toArabicNumeral(khatmProgress.todayPagesCount)}</strong> ص</span>
+              <span>الأجزاء: <strong className="text-sky-300">~{toArabicNumeral(khatmProgress.estimatedJuzCompleted)}</strong> / ٣٠</span>
+            </div>
+          </div>
+          {onOpenLiveVoice && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenLiveVoice();
+              }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-extrabold bg-gradient-to-r from-amber-950 via-amber-900/80 to-amber-950 text-amber-200 border border-amber-400/60 shadow-lg mb-2"
+            >
+              <div className="flex items-center gap-3">
+                <Radio className="w-5 h-5 text-amber-400 animate-pulse" />
+                <span>المحادثة الصوتية المباشرة (Gemini 3.8 Live API)</span>
+              </div>
+              <span className="text-[11px] bg-amber-500 text-stone-950 px-2 py-0.5 rounded-full font-bold">
+                مباشر Live
+              </span>
+            </button>
+          )}
+
+          {onOpenNotifications && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenNotifications();
+              }}
+              className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold bg-amber-950/40 text-amber-200 border border-amber-500/40 mb-2 shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-amber-400 animate-pulse" />
+                <span>تنبيهات الورد القرآني (Push Notifications)</span>
+              </div>
+              <span className="text-[11px] bg-amber-500 text-stone-950 px-2 py-0.5 rounded-full font-bold">
+                منبّه يومي
+              </span>
+            </button>
+          )}
+
+          {onOpenAndroidInstall && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAndroidInstall();
+              }}
+              className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 mb-2 shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <Smartphone className="w-5 h-5 text-emerald-400" />
+                <span>تطبيق أندرويد (تثبيت وتحميل)</span>
+              </div>
+              <span className="text-[11px] bg-emerald-500 text-stone-950 px-2 py-0.5 rounded-full font-bold">
+                Android APK
+              </span>
+            </button>
+          )}
+
+          {onOpenQuranModeModal && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenQuranModeModal();
+              }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-extrabold bg-gradient-to-r from-amber-600 to-amber-500 text-stone-950 border border-amber-300 shadow-lg mb-2"
+            >
+              <div className="flex items-center gap-3">
+                <Headphones className="w-5 h-5 text-stone-950" />
+                <span>مشغل القرآن الصوتي (مشغل الصوت)</span>
+              </div>
+              <span className="text-[11px] bg-stone-950 text-amber-300 px-2 py-0.5 rounded-full font-bold">
+                114 سورة
+              </span>
+            </button>
+          )}
+
           {onToggleListeningMode && (
             <button
               onClick={() => {
@@ -624,6 +1248,41 @@ export const Navbar: React.FC<NavbarProps> = ({
           })}
         </div>
       )}
+
+      {/* Dynamic Khatm Completion Header Bottom Progress Bar Track */}
+      <div 
+        className="w-full bg-stone-950/90 h-[2.5px] relative overflow-visible border-t border-amber-500/20 cursor-pointer group"
+        onClick={() => {
+          setActiveView('khatma');
+          if (khatmProgress.isCompleted) {
+            triggerKhatmCelebration();
+          }
+        }}
+        title={`نسبة ختم القرآن الكريم: ${khatmProgress.percentageFormatted} (${toArabicNumeral(khatmProgress.completedPagesCount)} من ٦٠٤ صفحة) - انقر لعرض خطة الختمة`}
+      >
+        <div 
+          className={`h-full ${
+            khatmProgress.isCompleted
+              ? 'bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300'
+              : 'bg-gradient-to-r from-emerald-500 via-amber-400 to-amber-300'
+          } transition-all duration-700 ease-out shadow-[0_0_10px_rgba(245,158,11,0.8)] relative`}
+          style={{ width: `${Math.min(100, Math.max(khatmProgress.completedPagesCount > 0 ? 0.8 : 0, khatmProgress.percentage))}%` }}
+        >
+          <div className="absolute right-0 top-0 bottom-0 w-3 bg-white/70 blur-[1px] animate-pulse" />
+        </div>
+
+        {/* Subtle Canvas Celebration Animation along header bottom track when 100% completed */}
+        {khatmProgress.isCompleted && (
+          <div className="absolute inset-x-0 -top-5 bottom-0 pointer-events-none h-8 overflow-visible">
+            <KhatmCelebrationCanvas
+              isCompleted={khatmProgress.isCompleted}
+              triggerKey={celebrationKey}
+              density="subtle"
+              ambientGlow={true}
+            />
+          </div>
+        )}
+      </div>
     </header>
   );
 };

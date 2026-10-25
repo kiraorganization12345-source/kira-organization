@@ -1,0 +1,47 @@
+{
+  "packageId": "com.touba.quran.twa",
+  "host": "ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app",
+  "name": "موقع التوبة - القرآن الكريم",
+  "launcherName": "التوبة",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "backgroundColor": "#000000",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/icon-512.png",
+  "maskableIconUrl": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/icon-512.png",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "المصحف الشريف",
+      "short_name": "المصحف",
+      "url": "/?view=surahs",
+      "chosen_icon_url": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/icon-192.png"
+    },
+    {
+      "name": "المساعد القرآني الذكي",
+      "short_name": "المساعد",
+      "url": "/?view=ai-assistant",
+      "chosen_icon_url": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://ais-dev-u42pm52potaiyvqqmoy5hv-961844995341.europe-west2.run.app/"
+}

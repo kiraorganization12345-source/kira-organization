@@ -56,6 +56,9 @@ export interface TafsirSource {
   name: string;
   author: string;
   language: string;
+  isSimplified?: boolean;
+  shortName?: string;
+  description?: string;
 }
 
 export interface Bookmark {
@@ -88,7 +91,7 @@ export interface KhatmaPlan {
 
 export interface AthkarItem {
   id: number;
-  category: 'morning' | 'evening' | 'post_prayer' | 'quranic_duas' | 'sleep';
+  category: 'morning' | 'evening' | 'post_prayer' | 'quranic_duas' | 'sleep' | 'wake_up' | 'mosque' | 'tasbeeh' | 'prophetic_duas' | 'ruqyah';
   title: string;
   text: string;
   count: number;
@@ -109,12 +112,33 @@ export interface PrayerTimes {
   city: string;
 }
 
-export type ViewMode = 'surahs' | 'reader' | 'mushaf_page' | 'khatma' | 'bookmarks' | 'search' | 'athkar' | 'prayers' | 'ai_assistant';
+export type ViewMode = 'surahs' | 'listening' | 'reader' | 'mushaf_page' | 'realistic_book' | 'khatma' | 'stats' | 'bookmarks' | 'search' | 'athkar' | 'prayers' | 'ai_assistant';
 
 export type NavDisplayMode = 'expanded' | 'floating' | 'hidden';
 
 export type FontStyle = 'Amiri Quran' | 'Scheherazade New' | 'Amiri' | 'Cairo';
 
-export type PaperTheme = 'dark' | 'light' | 'sepia' | 'emerald' | 'navy' | 'sand';
+export type PaperTheme = 'dark' | 'light' | 'sepia' | 'emerald' | 'navy' | 'sand' | 'amoled' | 'cream' | 'charcoal';
 
-export type TrackingHighlightColor = 'amber' | 'green' | 'red' | 'blue' | 'purple' | 'teal' | 'orange';
+export type TrackingHighlightColor = 
+  | 'amber' 
+  | 'green' 
+  | 'red' 
+  | 'blue' 
+  | 'purple' 
+  | 'teal' 
+  | 'orange'
+  | 'indigo'
+  | 'rose'
+  | 'mint'
+  | 'gold'
+  | 'bronze'
+  | 'silver';
+
+export type NavThemeColor = 'stone' | 'amber' | 'emerald' | 'navy' | 'crimson' | 'sepia';
+
+export type QuranTextColor = 'default' | 'emerald' | 'gold' | 'sepia' | 'indigo' | 'crimson' | 'charcoal';
+
+export type GlobalTheme = 'amber' | 'emerald' | 'sapphire' | 'amethyst' | 'ruby' | 'teal' | 'sepia';
+
+export type SiteMode = 'dark' | 'light' | 'amoled' | 'warm';

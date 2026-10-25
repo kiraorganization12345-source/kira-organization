@@ -6,11 +6,12 @@ import { toArabicNumeral } from '../services/quranApi';
 interface BookmarksNotesProps {
   onSelectVerse: (surahId: number, ayahNum: number) => void;
   onRemoveBookmark: (id: string) => void;
+  onBackToSurahs?: () => void;
 }
 
 const NOTES_STORAGE_KEY = 'quran_user_notes_v1';
 
-export const BookmarksNotes: React.FC<BookmarksNotesProps> = ({ onSelectVerse, onRemoveBookmark }) => {
+export const BookmarksNotes: React.FC<BookmarksNotesProps> = ({ onSelectVerse, onRemoveBookmark, onBackToSurahs }) => {
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
   const [notesMap, setNotesMap] = useState<Record<string, string>>({});
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export const BookmarksNotes: React.FC<BookmarksNotesProps> = ({ onSelectVerse, o
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       
       {/* Top Banner Header */}
-      <div className="bg-gradient-to-r from-amber-900 via-stone-900 to-amber-950 p-6 sm:p-8 rounded-3xl text-stone-100 shadow-xl border border-amber-500/30 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-amber-900 via-stone-900 to-amber-950 p-6 sm:p-8 rounded-3xl text-stone-100 shadow-xl border border-amber-500/30 flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold">
             <Bookmark className="w-4 h-4 text-amber-400" />
@@ -70,6 +71,15 @@ export const BookmarksNotes: React.FC<BookmarksNotesProps> = ({ onSelectVerse, o
             سجل خواطرك وتأملاتك الإيمانية مع الآيات التي تود العودة إليها مجدداً.
           </p>
         </div>
+
+        {onBackToSurahs && (
+          <button
+            onClick={onBackToSurahs}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-stone-900/80 hover:bg-amber-600 text-amber-200 hover:text-stone-950 border border-amber-500/30 text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95"
+          >
+            <span>← فهرس السور</span>
+          </button>
+        )}
       </div>
 
       {/* Bookmarks List */}

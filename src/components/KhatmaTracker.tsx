@@ -1,46 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, CheckCircle2, Circle, Trophy, RefreshCw, BookOpen, Flame } from 'lucide-react';
+import { Calendar, CheckCircle2, Circle, Trophy, RefreshCw, BookOpen, Flame, BarChart3, Bell, Sparkles } from 'lucide-react';
 import { toArabicNumeral } from '../services/quranApi';
+import { getUnifiedMushafProgress, syncKhatmaPlanPages, KHATM_PROGRESS_EVENT, KHATM_STORAGE_KEY } from '../services/khatmProgressService';
+import { KhatmCelebrationCanvas } from './KhatmCelebrationCanvas';
 
 interface KhatmaTrackerProps {
   onGoToPage: (page: number) => void;
+  onOpenStats?: () => void;
+  onOpenNotifications?: () => void;
+  onBackToSurahs?: () => void;
 }
 
-const STORAGE_KEY = 'quran_khatma_plan_v1';
-
-export const KhatmaTracker: React.FC<KhatmaTrackerProps> = ({ onGoToPage }) => {
+export const KhatmaTracker: React.FC<KhatmaTrackerProps> = ({ onGoToPage, onOpenStats, onOpenNotifications, onBackToSurahs }) => {
   const [targetDays, setTargetDays] = useState<number>(30);
-  const [completedPages, setCompletedPages] = useState<number[]>([]);
+  const [completedPages, setCompletedPages] = useState<number[]>(() => {
+    return getUnifiedMushafProgress().completedPagesList;
+  });
   const [streakDays, setStreakDays] = useState<number>(1);
+  const [celebrationKey, setCelebrationKey] = useState<number>(0);
 
-  // Load saved plan
+  // Load saved plan and sync with unified read pages
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data.targetDays) setTargetDays(data.targetDays);
-        if (Array.isArray(data.completedPages)) setCompletedPages(data.completedPages);
-        if (data.streakDays) setStreakDays(data.streakDays);
+    const loadAndSync = () => {
+      try {
+        const saved = localStorage.getItem(KHATM_STORAGE_KEY);
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.targetDays) setTargetDays(data.targetDays);
+          if (data.streakDays) setStreakDays(data.streakDays);
+        }
+        const unified = getUnifiedMushafProgress();
+        setCompletedPages(unified.completedPagesList);
+      } catch (e) {
+        console.warn('Failed to load khatma plan', e);
       }
-    } catch (e) {
-      console.warn('Failed to load khatma plan', e);
-    }
+    };
+
+    loadAndSync();
+
+    const handleProgressChange = () => {
+      loadAndSync();
+    };
+
+    window.addEventListener(KHATM_PROGRESS_EVENT, handleProgressChange);
+    return () => {
+      window.removeEventListener(KHATM_PROGRESS_EVENT, handleProgressChange);
+    };
   }, []);
 
-  // Save plan changes
+  // Save plan changes and sync across the whole app
   const savePlan = (pages: number[], days: number) => {
     setCompletedPages(pages);
     setTargetDays(days);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        targetDays: days,
-        completedPages: pages,
-        streakDays
-      }));
-    } catch (e) {
-      console.warn('Failed to save khatma plan', e);
-    }
+    syncKhatmaPlanPages(pages, days);
   };
 
   const togglePage = (p: number) => {
@@ -92,22 +104,80 @@ export const KhatmaTracker: React.FC<KhatmaTrackerProps> = ({ onGoToPage }) => {
           <p className="text-stone-300 text-sm max-w-xl font-cairo leading-relaxed">
             حدد هدفك لختم القرآن الكريم وتتبع قراءتك صفحة بصفحة بسهولة للالتزام بالورْد اليومي المستمر.
           </p>
+
+          <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-2">
+            {onOpenStats && (
+              <button
+                onClick={onOpenStats}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 text-xs font-bold transition-all shadow-md hover:scale-105"
+              >
+                <BarChart3 className="w-4 h-4 text-emerald-400" />
+                <span>عرض إحصائيات القراءة والرسوم البيانية</span>
+              </button>
+            )}
+
+            {onOpenNotifications && (
+              <button
+                onClick={onOpenNotifications}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all shadow-md hover:scale-105"
+              >
+                <Bell className="w-4 h-4 text-amber-400 animate-pulse" />
+                <span>ضبط منبّه الورد اليومي (تذكير)</span>
+              </button>
+            )}
+
+            {onBackToSurahs && (
+              <button
+                onClick={onBackToSurahs}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 hover:bg-amber-600 text-amber-200 hover:text-stone-950 border border-amber-500/40 text-xs font-bold transition-all shadow-md active:scale-95"
+              >
+                <span>← فهرس السور</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Progress Ring Card */}
-        <div className="bg-stone-850/80 p-6 rounded-2xl border border-amber-500/20 text-center space-y-2 min-w-[220px]">
-          <div className="text-4xl font-extrabold text-amber-400 font-quran">
-            %{toArabicNumeral(progressPercent)}
+        <div className={`p-6 rounded-2xl border text-center space-y-2 min-w-[220px] relative overflow-hidden ${
+          completedPages.length >= totalPages
+            ? 'bg-gradient-to-b from-amber-950/80 via-stone-900 to-emerald-950/80 border-amber-400 ring-2 ring-amber-400/40 shadow-xl'
+            : 'bg-stone-850/80 border-amber-500/20'
+        }`}>
+          {completedPages.length >= totalPages && (
+            <KhatmCelebrationCanvas isCompleted={true} triggerKey={celebrationKey} density="vibrant" />
+          )}
+          <div className="text-4xl font-extrabold text-amber-400 font-quran flex items-center justify-center gap-1">
+            <span>%{toArabicNumeral(progressPercent)}</span>
+            {completedPages.length >= totalPages && (
+              <span className="text-xl animate-bounce">🌟</span>
+            )}
           </div>
           <div className="text-xs text-stone-300 font-semibold">
-            تم إنجاز {toArabicNumeral(completedPages.length)} من {toArabicNumeral(totalPages)} صفحة
+            {completedPages.length >= totalPages ? (
+              <span className="text-emerald-300 font-bold">مبارك ختم القرآن الكريم كاملاً! 🎉</span>
+            ) : (
+              <span>تم إنجاز {toArabicNumeral(completedPages.length)} من {toArabicNumeral(totalPages)} صفحة</span>
+            )}
           </div>
-          <div className="w-full bg-stone-700 h-2 rounded-full overflow-hidden">
+          <div className="w-full bg-stone-700 h-2.5 rounded-full overflow-hidden border border-stone-800 p-0.5">
             <div
-              className="bg-amber-500 h-full transition-all duration-500"
+              className={`h-full ${
+                completedPages.length >= totalPages
+                  ? 'bg-gradient-to-r from-amber-400 via-emerald-400 to-amber-300 animate-pulse'
+                  : 'bg-amber-500'
+              } transition-all duration-500 rounded-full`}
               style={{ width: `${progressPercent}%` }}
             ></div>
           </div>
+          {completedPages.length >= totalPages && (
+            <button
+              onClick={() => setCelebrationKey(prev => prev + 1)}
+              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-stone-950" />
+              <span>إعادة عرض الاحتفال 🎉</span>
+            </button>
+          )}
         </div>
 
       </div>
@@ -196,11 +266,35 @@ export const KhatmaTracker: React.FC<KhatmaTrackerProps> = ({ onGoToPage }) => {
 
       {/* Pages Matrix (1 - 604) */}
       <div className="bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200 dark:border-stone-800 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold font-quran text-stone-900 dark:text-amber-100">
-            جدول الصفحات التفصيلي (٦٠٤ صفحة)
-          </h3>
-          <span className="text-xs text-stone-500">انقر على الصفحات التي قرأتها لتعليمها بالصح</span>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-lg font-bold font-quran text-stone-900 dark:text-amber-100">
+              جدول الصفحات التفصيلي (٦٠٤ صفحة)
+            </h3>
+            <span className="text-xs text-stone-500">انقر على الصفحات التي قرأتها لتعليمها بالصح (نقرتين للانتقال)</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const allPages = Array.from({ length: 604 }, (_, i) => i + 1);
+                savePlan(allPages, targetDays);
+                setCelebrationKey((prev) => prev + 1);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
+              title="تعليم كافة الصفحات كمنجزة لتجربة احتفال الختمة"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>إتمام الختمة (١٠٠٪)</span>
+            </button>
+            <button
+              onClick={() => savePlan([], targetDays)}
+              className="px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold text-xs transition-all"
+              title="إعادة ضبط الصفحات المقروءة للبدء من جديد"
+            >
+              إعادة تعيين
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-16 gap-1.5 max-h-[400px] overflow-y-auto p-2 border border-stone-100 dark:border-stone-800 rounded-2xl">
